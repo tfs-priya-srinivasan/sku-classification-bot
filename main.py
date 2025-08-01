@@ -113,7 +113,7 @@ def login_page():
         saved_users = load_saved_users()
         
         if saved_users:
-            st.info("💡 Select from saved users or login with new credentials")
+            st.info("💡 Select from saved users or login with email")
             
             # Dropdown for saved users
             saved_emails = list(saved_users.keys())
@@ -133,7 +133,7 @@ def login_page():
                 st.rerun()
             
             st.markdown("---")
-            st.markdown("**Or login with new credentials:**")
+            st.markdown("**Or login with email address:**")
         
         # New login form
         with st.form("login_form"):
