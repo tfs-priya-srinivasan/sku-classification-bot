@@ -1,0 +1,22 @@
+[
+  {
+    "timestamp": "2025-08-01 16:50:26",
+    "user_email": "priya.srinivasan@thermofisher.com",
+    "sku_input": "",
+    "name_input": "100mL LABTAINER PRO, CX5-14, STANDARD CATALOG PRODUCT",
+    "predicted_product_line_code": "2JD",
+    "predicted_cmr_line": "2DBioProcessContainers",
+    "predicted_product_line_name": "GENERAL 2D",
+    "predicted_sub_platform": "FLEXIBLE SOLUTIONS",
+    "predicted_sku_number": "PL30005.12",
+    "predicted_sku_name": "1000mL Labtainer Pro, CX5-14, Standard Catalog Product",
+    "confidence_score": 88.96,
+    "sku_score": 0.0,
+    "name_score": 100.0,
+    "feedback": "like",
+    "prediction_type": "fuzzy",
+    "correct_product_line_code": "",
+    "correct_business_unit": "",
+    "user_comment": ""
+  }
+]
