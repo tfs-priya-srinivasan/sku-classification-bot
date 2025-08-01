@@ -1192,7 +1192,7 @@ def main():
     """, unsafe_allow_html=True)
 
     # Welcome message
-    st.markdown("<h1 style='color:#D70000;'>🤖 SKU Product Line Classification System</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color:#D70000;'>🤖 SKU Classification System</h1>", unsafe_allow_html=True)
     st.markdown("<h4 style='color:#444;'>Welcome to the Thermo Fisher SKU AI Classifier!</h4>", unsafe_allow_html=True)
     st.info("Quick Start: Use the tabs below to classify a single SKU, process bulk files, or view analytics.")
 
@@ -1224,7 +1224,7 @@ def main():
 
     # Load data
     if 'df' not in st.session_state:
-        with st.spinner("🔄 Loading training data..."):
+        with st.spinner("Loading training data..."):
             st.session_state.df = load_data()
             if st.session_state.df is not None:
                 st.session_state.vectorizer, st.session_state.tfidf_matrix = create_similarity_index(st.session_state.df)
