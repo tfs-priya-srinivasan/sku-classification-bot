@@ -405,6 +405,28 @@ def load_business_rules_data():
         st.error(f"Error loading Business Rule Book: {str(e)}")
         return None
 
+@st.cache_data
+def load_reference_hierarchy():
+    """Load reference hierarchy data for Product Line - LV 2 mapping"""
+    try:
+        return pd.read_excel('reference_file_hierechy.xlsx')
+    except Exception as e:
+        st.error(f"Error loading reference hierarchy: {str(e)}")
+        return None
+
+def get_product_line_lv2(product_line_code, df_hierarchy):
+    """Get Product Line - LV 2 from product line code"""
+    if df_hierarchy is None:
+        return 'N/A'
+    
+    try:
+        match = df_hierarchy[df_hierarchy['PL Codes'] == product_line_code]
+        if not match.empty:
+            return match.iloc[0]['Product Line - LV 2']
+        return 'N/A'
+    except Exception:
+        return 'N/A'
+
 @st.cache_resource
 def create_similarity_index(df):
     """Create TF-IDF similarity index"""
@@ -597,6 +619,9 @@ def get_fuzzy_predictions(df, sku_partial, name_partial, vectorizer, tfidf_matri
     results = []
     seen_combinations = set()
     
+    # Load hierarchy data for Product Line - LV 2
+    df_hierarchy = st.session_state.get('df_hierarchy')
+    
     for idx in top_indices:
         if len(results) >= top_k or similarities[idx] < 0.1:
             continue
@@ -613,12 +638,16 @@ def get_fuzzy_predictions(df, sku_partial, name_partial, vectorizer, tfidf_matri
                 row['product line name'], name_partial
             )
             
+            # Get Product Line - LV 2
+            product_line_lv2 = get_product_line_lv2(adj_code, df_hierarchy)
+            
             results.append({
                 'sku_number': row['sku number'],
                 'sku_name': row['sku name'],
                 'product_line_code': adj_code,
                 'cmr_product_line': correct_cmr,
                 'product_line_name': adj_name,
+                'product_line_lv2': product_line_lv2,
                 'sub_platform': row['sub platform'],
                 'sku_score': round(calculate_simple_similarity(sku_partial, str(row['sku number'])), 2),
                 'name_score': round(calculate_simple_similarity(name_partial, str(row['sku name'])), 2),
@@ -664,12 +693,17 @@ def ultra_fast_bulk_predictions(input_df, df, vectorizer, tfidf_matrix):
                         match_row['product line name'], row.get('sku name', '')
                     )
                     
+                    # Get Product Line - LV 2
+                    df_hierarchy = st.session_state.get('df_hierarchy')
+                    product_line_lv2 = get_product_line_lv2(adj_code, df_hierarchy)
+                    
                     prefix = f'Prediction {pred_num+1}: '
                     result_row[f'{prefix}SKU Number'] = match_row['sku number']
                     result_row[f'{prefix}SKU Name'] = match_row['sku name']
                     result_row[f'{prefix}CMR Product Line'] = correct_cmr
                     result_row[f'{prefix}Product Line Name'] = adj_name
                     result_row[f'{prefix}Product Line Code'] = adj_code
+                    result_row[f'{prefix}Product Line - LV 2'] = product_line_lv2
                     result_row[f'{prefix}Business Unit'] = match_row['sub platform']
                     result_row[f'{prefix}Confidence Score'] = round(top_scores[i, pred_num] * 100, 2)
                 else:
@@ -723,12 +757,18 @@ def display_exact_matches(exact_matches, sku_input, name_input, df):
         adj_code, adj_name, adj_cmr = adjust_product_line_for_volume(
             row['cmr product line'], row['product line code'], row['product line name'], row['sku name']
         )
+        
+        # Get Product Line - LV 2
+        df_hierarchy = st.session_state.get('df_hierarchy')
+        product_line_lv2 = get_product_line_lv2(adj_code, df_hierarchy)
+        
         with st.expander(f"Match {idx + 1}: {adj_code} - {adj_cmr}", expanded=True):
             col1, col2 = st.columns(2)
             with col1:
                 st.write("**SKU Number:**", row['sku number'])
                 st.write("**Product Line Code:**", adj_code)
                 st.write("**Product Line Name:**", adj_name)
+                st.write("**Product Line - LV 2:**", product_line_lv2)
             with col2:
                 st.write("**SKU Name:**", row['sku name'])
                 st.write("**CMR Product Line:**", adj_cmr)
@@ -839,6 +879,7 @@ def display_fuzzy_matches(fuzzy_matches, sku_input, name_input, df_rules):
                 st.write("**SKU Number:**", match['sku_number'])
                 st.write("**Product Line Code:**", match['product_line_code'])
                 st.write("**Product Line Name:**", match['product_line_name'])
+                st.write("**Product Line - LV 2:**", match.get('product_line_lv2', 'N/A'))
             
             with col2:
                 truncated_name = match['sku_name'][:50] + "..." if len(match['sku_name']) > 50 else match['sku_name']
@@ -1231,6 +1272,9 @@ def main():
 
     if 'df_rules' not in st.session_state:
         st.session_state.df_rules = load_business_rules_data()
+    
+    if 'df_hierarchy' not in st.session_state:
+        st.session_state.df_hierarchy = load_reference_hierarchy()
 
     df = st.session_state.df
     df_rules = st.session_state.df_rules
