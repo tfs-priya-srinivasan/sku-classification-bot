@@ -139,7 +139,7 @@ def login_page():
         with st.form("login_form"):
             email = st.text_input(
                 "Email Address",
-                placeholder="e.g., aniket_ladse@thermofisher.com",
+                placeholder="e.g., aniket.ladse@thermofisher.com",
                 help="Use your ThermoFisher email address"
             )
             
