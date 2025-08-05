@@ -139,13 +139,13 @@ def login_page():
         with st.form("login_form"):
             email = st.text_input(
                 "Email Address",
-                placeholder="e.g., aniket.ladse@thermofisher.com",
+                placeholder="Please enter your ThermoFisher email",
                 help="Use your ThermoFisher email address"
             )
             
             name = st.text_input(
                 "Full Name",
-                placeholder="e.g., Aniket Ladse",
+                placeholder="Full Name",
                 help="Enter your full name"
             )
             
@@ -240,7 +240,7 @@ def save_feedback(sku_input, name_input, prediction, feedback_type, user_email, 
         try:
             from teams_config import send_feedback_notification
             user_name = st.session_state.user_name
-            send_feedback_notification(user_email, user_name, sku_input, name_input, prediction, feedback_type)
+            send_feedback_notification(user_email, user_name, sku_input, name_input, prediction, feedback_type, correct_product_line, correct_business_unit, user_comment)
         except Exception as teams_error:
             print(f"Teams notification error: {str(teams_error)}")
         
@@ -791,7 +791,8 @@ def display_exact_matches(exact_matches, sku_input, name_input, df):
             with feedback_col1:
                 if st.button("👍 Like", key=f"like_exact_{idx}", use_container_width=True):
                     if save_feedback(sku_input, name_input, prediction_data, "like", st.session_state.user_email):
-                        st.success("✅ Thank you for your feedback!")
+                        st.success("✅ Feedback submitted successfully! Thank you for your feedback.")
+                        time.sleep(10)
             
             with feedback_col2:
                 if st.button("👎 Dislike", key=f"dislike_exact_{idx}", use_container_width=True):
@@ -840,7 +841,8 @@ def display_exact_matches(exact_matches, sku_input, name_input, df):
                     
                     if save_feedback(sku_input, name_input, prediction_data, "dislike", 
                                    st.session_state.user_email, correct_pl, correct_bu, user_comment):
-                        st.success("✅ Thank you for your detailed feedback!")
+                        st.success("✅ Feedback submitted successfully! Thank you for your detailed feedback.")
+                        time.sleep(10)
                         st.session_state[f'show_dislike_form_exact_{idx}'] = False
                         st.rerun()
                 
@@ -913,7 +915,8 @@ def display_fuzzy_matches(fuzzy_matches, sku_input, name_input, df_rules):
             with feedback_col1:
                 if st.button("👍 Like", key=f"like_fuzzy_{i}", use_container_width=True):
                     if save_feedback(sku_input, name_input, match, "like", st.session_state.user_email):
-                        st.success("✅ Thank you for your feedback!")
+                        st.success("✅ Feedback submitted successfully! Thank you for your feedback.")
+                        time.sleep(10)
             
             with feedback_col2:
                 if st.button("👎 Dislike", key=f"dislike_fuzzy_{i}", use_container_width=True):
@@ -963,7 +966,8 @@ def display_fuzzy_matches(fuzzy_matches, sku_input, name_input, df_rules):
                     
                     if save_feedback(sku_input, name_input, match, "dislike", 
                                    st.session_state.user_email, correct_pl, correct_bu, user_comment):
-                        st.success("✅ Thank you for your detailed feedback!")
+                        st.success("✅ Feedback submitted successfully! Thank you for your detailed feedback.")
+                        time.sleep(10)
                         st.session_state[f'show_dislike_form_fuzzy_{i}'] = False
                         st.rerun()
                 
@@ -1332,7 +1336,7 @@ def main():
     #             st.metric("👎 Dislikes", dislikes)
     #     else:
     #         st.info("No feedback data available yet")
-    #     admin_users = ['aniket.ladse@thermofisher.com', 'priya.srinivasan@thermofisher.com']
+    #     admin_users = ['sample@thermofisher.com', 'sample_v1@thermofisher.com']
     #     if st.session_state.user_email in admin_users:
     #         st.markdown("---")
     #         st.header("🔄 Model Improvement")

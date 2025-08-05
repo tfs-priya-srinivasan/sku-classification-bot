@@ -21,7 +21,7 @@ TEAMS_WEBHOOK_URL = "https://thermofisher.webhook.office.com/webhookb2/2a9e5d20-
 #    webhook_url = TEAMS_WEBHOOK_URL
 
 # Test message function
-def send_feedback_notification(user_email, user_name, sku_input, name_input, prediction, feedback_type):
+def send_feedback_notification(user_email, user_name, sku_input, name_input, prediction, feedback_type, correct_product_line=None, correct_business_unit=None, user_comment=None):
     """Send feedback notification to Teams"""
     import requests
     from datetime import datetime
@@ -33,6 +33,29 @@ def send_feedback_notification(user_email, user_name, sku_input, name_input, pre
     theme_color = "28A745" if feedback_type == "like" else "DC3545"  # Green for like, Red for dislike
     feedback_emoji = "👍" if feedback_type == "like" else "👎"
     
+    # Build facts list
+    facts = [
+        {"name": "User Email", "value": user_email},
+        {"name": "User Name", "value": user_name},
+        {"name": "Feedback Type", "value": f"{feedback_emoji} {feedback_type.upper()}"},
+        {"name": "Input SKU Number", "value": sku_input or "N/A"},
+        {"name": "Input SKU Name", "value": name_input or "N/A"},
+        {"name": "Predicted Code", "value": prediction.get('product_line_code', 'N/A')},
+        {"name": "Predicted CMR Line", "value": prediction.get('cmr_product_line', 'N/A')},
+        {"name": "Confidence Score", "value": f"{prediction.get('combined_score', 0)}%"}
+    ]
+    
+    # Add correction details for dislikes
+    if feedback_type == "dislike":
+        if correct_product_line:
+            facts.append({"name": "Correct Product Line Code", "value": correct_product_line})
+        if correct_business_unit:
+            facts.append({"name": "Correct Business Unit", "value": correct_business_unit})
+        if user_comment:
+            facts.append({"name": "User Comment", "value": user_comment})
+    
+    facts.append({"name": "Timestamp", "value": datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
+    
     message = {
         "@type": "MessageCard",
         "@context": "http://schema.org/extensions",
@@ -41,17 +64,7 @@ def send_feedback_notification(user_email, user_name, sku_input, name_input, pre
         "sections": [{
             "activityTitle": f"SKU Classification - User Feedback {feedback_emoji}",
             "activitySubtitle": f"User: {user_name} ({user_email})",
-            "facts": [
-                {"name": "User Email", "value": user_email},
-                {"name": "User Name", "value": user_name},
-                {"name": "Feedback Type", "value": f"{feedback_emoji} {feedback_type.upper()}"},
-                {"name": "Input SKU Number", "value": sku_input or "N/A"},
-                {"name": "Input SKU Name", "value": name_input or "N/A"},
-                {"name": "Predicted Code", "value": prediction.get('product_line_code', 'N/A')},
-                {"name": "Predicted CMR Line", "value": prediction.get('cmr_product_line', 'N/A')},
-                {"name": "Confidence Score", "value": f"{prediction.get('combined_score', 0)}%"},
-                {"name": "Timestamp", "value": datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-            ]
+            "facts": facts
         }]
     }
     
