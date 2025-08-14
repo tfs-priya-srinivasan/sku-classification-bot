@@ -552,6 +552,8 @@ def adjust_product_line_for_volume(original_cmr, product_line_code, product_line
     sku_name_upper = str(sku_name).upper() if sku_name else ""
     if "SPIGOT NEEDLE" in sku_name_upper:
         return "2L0", "BE20 TANK FITTINGS", "BioproductionContainments"
+    if "PILLOW BAG" in sku_name_upper:
+        return "2JE", "GENERAL 2D", "2DBioProcessContainers"
     if "BETA BAG" in sku_name_upper or "NEEDLE" in sku_name_upper:
         return "2NK", "FF FILLING ASSEMBLIES", "FillFinish"
     if original_cmr not in ['2DBioProcessContainers', '3DBioProcessContainers']:
